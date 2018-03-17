@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+target="$1"
+
+mkdir -p "$(dirname "$target")"
+
+if [[ -f "$target" ]]; then
+  old_version=$(<"$target")
+fi
+
+new_version="$(git describe --exact-match @ 2>/dev/null || git rev-parse --short @)"
+
+if [[ "${old_version-}" != "$new_version" ]]; then
+  echo "$new_version" >"$target"
+fi
