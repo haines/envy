@@ -1,0 +1,23 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.10
+
+    working_directory: /go/src/github.com/haines/envy
+
+    steps:
+      - checkout
+
+      - run:
+          name: 🚚 Get dependencies
+          command: make get
+
+      - run:
+          name: 💅 Lint code
+          command: make check
+
+      - run:
+          name: 📦 Build executable
+          command: make build
