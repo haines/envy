@@ -2,6 +2,7 @@
 
 BINARY := envy
 SOURCES := $(shell find . -type f -name '*.go')
+TESTS := $(shell find test -type f -name '*.bats')
 OUT := target/
 TARGET := $(OUT)$(BINARY)
 VERSION := $(OUT)version
@@ -31,4 +32,7 @@ get:
 install:
 	@go install $(LDFLAGS)
 
-.PHONY: all build check clean get install
+test:
+	@bats $(TESTS)
+
+.PHONY: all build check clean get install test

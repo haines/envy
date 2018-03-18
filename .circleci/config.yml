@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.10
+      - image: ahaines/envy-circleci:1
 
     working_directory: /go/src/github.com/haines/envy
 
@@ -21,3 +21,7 @@ jobs:
       - run:
           name: 📦 Build executable
           command: make build
+
+      - run:
+          name: 🔬 Run tests
+          command: make test
