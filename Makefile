@@ -2,6 +2,7 @@
 
 BINARY := envy
 SOURCES := $(shell find . -type f -name '*.go')
+TESTS := $(shell find test -type f -name '*.bats')
 OUT := target/
 TARGET := $(OUT)$(BINARY)
 VERSION := $(OUT)version
@@ -10,7 +11,7 @@ DOCKER_REPO := ahaines/$(BINARY)
 
 LDFLAGS = -ldflags "-X github.com/haines/envy/cmd.Version=`cat $(VERSION)`"
 
-WRITE_VERSION := $(shell ./write-version $(VERSION))
+WRITE_VERSION := $(shell script/write-version $(VERSION))
 
 $(TARGET): $(SOURCES) $(VERSION)
 	@go build $(LDFLAGS) -o $(TARGET)
@@ -18,6 +19,9 @@ $(TARGET): $(SOURCES) $(VERSION)
 all: get build
 
 build: $(TARGET)
+
+check:
+	@script/check
 
 clean:
 	@rm -Rf $(OUT)
@@ -28,4 +32,7 @@ get:
 install:
 	@go install $(LDFLAGS)
 
-.PHONY: all build clean get install
+test:
+	@bats $(TESTS)
+
+.PHONY: all build check clean get install test

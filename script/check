@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+
+unformatted_files=$(git ls-files '*.go' | xargs gofmt -l)
+
+if [[ -n "$unformatted_files" ]]; then
+  printf "\e[31m🤢 Found unformatted files:\e[0m\n%s\n" \
+         "$unformatted_files"
+
+  exit 1
+fi
+
+go list ./... | xargs go vet
