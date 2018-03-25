@@ -6,13 +6,20 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 var envyPath string
 
-type result struct {
+type envyParams struct {
+	stdin string
+}
+
+type envyResult struct {
 	ExitStatus int
 	Stdout     string
 	Stderr     string
@@ -27,8 +34,19 @@ func exitStatus(err error) (int, error) {
 	return -1, err
 }
 
-func envy(args ...string) *result {
+func envy() *envyParams {
+	return &envyParams{}
+}
+
+func (p *envyParams) Stdin(stdin string) *envyParams {
+	p.stdin = stdin
+	return p
+}
+
+func (p *envyParams) Run(args ...string) *envyResult {
 	command := exec.Command(envyPath, args...)
+
+	command.Stdin = strings.NewReader(p.stdin)
 
 	stdout := bytes.Buffer{}
 	command.Stdout = &stdout
@@ -38,7 +56,7 @@ func envy(args ...string) *result {
 
 	err := command.Run()
 
-	result := &result{
+	result := &envyResult{
 		ExitStatus: 0,
 		Stdout:     stdout.String(),
 		Stderr:     stderr.String(),
@@ -52,6 +70,56 @@ func envy(args ...string) *result {
 	}
 
 	return result
+}
+
+func tempFileContaining(data string) *os.File {
+	file, err := ioutil.TempFile(".", "envy_test_")
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = file.WriteString(data)
+	if err != nil {
+		panic(err)
+	}
+
+	err = file.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	return file
+}
+
+func uniqueFilename() string {
+	return uuid.New().String()
+}
+
+type fileDetails struct {
+	Exists      bool
+	Contents    string
+	Permissions os.FileMode
+}
+
+func outputFile(filename string) *fileDetails {
+	info, err := os.Stat(filename)
+
+	if os.IsNotExist(err) {
+		return &fileDetails{Exists: false}
+	} else if err != nil {
+		panic(err)
+	}
+
+	contents, err := ioutil.ReadFile(filename)
+	if err != nil {
+		panic(err)
+	}
+
+	return &fileDetails{
+		Exists:      true,
+		Contents:    string(contents),
+		Permissions: info.Mode().Perm(),
+	}
 }
 
 func TestMain(m *testing.M) {

@@ -7,7 +7,7 @@ import (
 )
 
 func TestVersion(t *testing.T) {
-	result := envy("--version")
+	result := envy().Run("--version")
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Regexp(t, "^envy ", result.Stdout)
