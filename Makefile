@@ -33,7 +33,7 @@ clean:
 
 get:
 	@go get github.com/jstemmer/go-junit-report
-	@go get -t ./...
+	@dep ensure
 
 install:
 	@go install $(LDFLAGS)

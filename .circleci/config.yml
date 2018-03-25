@@ -3,16 +3,24 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.10
+      - image: ahaines/envy-circleci:2
 
     working_directory: /go/src/github.com/haines/envy
 
     steps:
       - checkout
 
+      - restore_cache:
+          key: vendor:v1:{{checksum "Gopkg.lock"}}
+
       - run:
           name: 🚚 Get dependencies
           command: make get
+
+      - save_cache:
+          key: vendor:v1:{{checksum "Gopkg.lock"}}
+          paths:
+            - vendor
 
       - run:
           name: 💅 Lint code
