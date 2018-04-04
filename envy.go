@@ -10,32 +10,41 @@ import (
 
 var logger = log.New(os.Stderr, "", 0)
 
-// Run parses the template definition from the first named file, executes it, and writes the output to the second named file.
-// If the input filename is "-", the template definition is read from stdin.
-// If the output filename is "-", the output is written to stdout.
-func Run(inputFilename string, outputFilename string) {
-	template, err := read(inputFilename)
+// Config holds the parameters for Run.
+type Config struct {
+	InputFilename  string // if empty or "-", the template definition is read from stdin.
+	OutputFilename string // if empty or "-", the output is written to stdout.
+	Profile        string
+}
+
+// Run parses the template definition from the input file, executes it, and writes the result to the output file.
+func Run(config *Config) {
+	template, err := read(config)
 	if err != nil {
 		logger.Fatal("Failed to read template\n", err)
 	}
 
-	err = write(template, outputFilename)
+	err = write(template, config)
 	if err != nil {
 		logger.Fatal("Failed to write output\n", err)
 	}
 }
 
-func read(filename string) (*template.Template, error) {
+func read(config *Config) (*template.Template, error) {
 	var (
 		name string
 		file *os.File
 		err  error
 	)
 
-	if filename == "-" {
+	filename := config.InputFilename
+
+	switch filename {
+	case "", "-":
 		name = "stdin"
 		file = os.Stdin
-	} else {
+
+	default:
 		name = filepath.Base(filename)
 		file, err = os.Open(filename)
 		if err != nil {
@@ -49,18 +58,29 @@ func read(filename string) (*template.Template, error) {
 		return nil, err
 	}
 
-	return template.New(name).Parse(string(contents))
+	getParameter, err := parameterGetter(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return template.New(name).Funcs(template.FuncMap{
+		"getParameter": getParameter,
+	}).Parse(string(contents))
 }
 
-func write(template *template.Template, filename string) error {
+func write(template *template.Template, config *Config) error {
 	var (
 		file *os.File
 		err  error
 	)
 
-	if filename == "-" {
+	filename := config.OutputFilename
+
+	switch filename {
+	case "", "-":
 		file = os.Stdout
-	} else {
+
+	default:
 		file, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 		if err != nil {
 			return err
@@ -68,5 +88,5 @@ func write(template *template.Template, filename string) error {
 		defer file.Close()
 	}
 
-	return template.Execute(file, "this isn't very useful yet!")
+	return template.Execute(file, "")
 }

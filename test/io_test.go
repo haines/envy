@@ -5,12 +5,13 @@ import (
 	"os"
 	"testing"
 
+	. "github.com/haines/envy/test/helpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDefaultInputAndOutput(t *testing.T) {
-	result := envy().Stdin("👋🌍").Run()
+	result := Envy().Stdin("👋🌍").Run()
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Equal(t, "👋🌍", result.Stdout)
@@ -18,7 +19,7 @@ func TestDefaultInputAndOutput(t *testing.T) {
 }
 
 func TestExplicitInputFromStdin(t *testing.T) {
-	result := envy().Stdin("💃🕺").Run("--input", "-")
+	result := Envy().Stdin("💃🕺").Run("--input", "-")
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Equal(t, "💃🕺", result.Stdout)
@@ -26,9 +27,9 @@ func TestExplicitInputFromStdin(t *testing.T) {
 }
 
 func TestInputFromFile(t *testing.T) {
-	file := tempFileContaining("🔅🔆")
+	filename := TempFileContaining("🔅🔆")
 
-	result := envy().Run("--input", file.Name())
+	result := Envy().Run("--input", filename)
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Equal(t, "🔅🔆", result.Stdout)
@@ -36,7 +37,7 @@ func TestInputFromFile(t *testing.T) {
 }
 
 func TestExplicitOutputToStdout(t *testing.T) {
-	result := envy().Stdin("🙂🙃").Run("--output", "-")
+	result := Envy().Stdin("🙂🙃").Run("--output", "-")
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Equal(t, "🙂🙃", result.Stdout)
@@ -44,11 +45,11 @@ func TestExplicitOutputToStdout(t *testing.T) {
 }
 
 func TestOutputToNewFile(t *testing.T) {
-	filename := uniqueFilename()
+	filename := UniqueFilename()
 
-	result := envy().Stdin("🌩🌧").Run("--output", filename)
+	result := Envy().Stdin("🌩🌧").Run("--output", filename)
 
-	file := outputFile(filename)
+	file := OutputFile(filename)
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Empty(t, result.Stdout)
@@ -60,15 +61,15 @@ func TestOutputToNewFile(t *testing.T) {
 }
 
 func TestOutputToExistingFile(t *testing.T) {
-	filename := uniqueFilename()
+	filename := UniqueFilename()
 	err := ioutil.WriteFile(filename, []byte("💣💥"), 0644)
 	if err != nil {
 		panic(err)
 	}
 
-	result := envy().Stdin("🤜🤛").Run("--output", filename)
+	result := Envy().Stdin("🤜🤛").Run("--output", filename)
 
-	file := outputFile(filename)
+	file := OutputFile(filename)
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Empty(t, result.Stdout)

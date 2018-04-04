@@ -1,2 +1,5 @@
+.env
+.terraform/
 target/
+terraform.tfstate*.backup
 vendor/
