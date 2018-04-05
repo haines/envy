@@ -14,6 +14,8 @@ var logger = log.New(os.Stderr, "", 0)
 type Config struct {
 	InputFilename  string // if empty or "-", the template definition is read from stdin.
 	OutputFilename string // if empty or "-", the output is written to stdout.
+	Permissions    os.FileMode
+	SkipChmod      bool
 	Profile        string
 }
 
@@ -75,18 +77,28 @@ func write(template *template.Template, config *Config) error {
 	)
 
 	filename := config.OutputFilename
+	permissions := os.FileMode(config.Permissions)
 
 	switch filename {
 	case "", "-":
 		file = os.Stdout
 
 	default:
-		file, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+		file, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, permissions)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
 	}
 
-	return template.Execute(file, "")
+	err = template.Execute(file, "")
+	if err != nil {
+		return err
+	}
+
+	if file != os.Stdout && !config.SkipChmod {
+		err = os.Chmod(filename, permissions)
+	}
+
+	return err
 }

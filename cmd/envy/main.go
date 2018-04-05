@@ -32,6 +32,8 @@ func init() {
 
 	command.Flags().StringVarP(&config.InputFilename, "input", "i", "-", `read template from file ("-" is stdin)`)
 	command.Flags().StringVarP(&config.OutputFilename, "output", "o", "-", `write output to file ("-" is stdout)`)
+	command.Flags().Var(newPermissionsValue(0600, &config.Permissions), "chmod", "output file permissions")
+	command.Flags().BoolVar(&config.SkipChmod, "no-chmod", false, "don't modify output file permissions")
 	command.Flags().StringVar(&config.Profile, "profile", "", "use a specific profile from your AWS credential file")
 }
 

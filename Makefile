@@ -19,7 +19,7 @@ $(VERSION):
 	@script/write-version $(VERSION)
 
 $(TARGET): $(SOURCES) $(VERSION)
-	@go build $(LDFLAGS) -o $(TARGET) cmd/envy/main.go
+	@go build $(LDFLAGS) -o $(TARGET) cmd/envy/*.go
 
 all: get build test
 
