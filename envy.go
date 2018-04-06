@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -67,6 +68,7 @@ func read(config *Config) (*template.Template, error) {
 
 	return template.New(name).Funcs(template.FuncMap{
 		"getParameter": getParameter,
+		"quote":        quote,
 	}).Parse(string(contents))
 }
 
@@ -101,4 +103,8 @@ func write(template *template.Template, config *Config) error {
 	}
 
 	return err
+}
+
+func quote(value string) string {
+	return "'" + strings.Replace(value, "'", `'\''`, -1) + "'"
 }
