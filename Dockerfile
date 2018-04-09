@@ -1,11 +1,11 @@
-FROM golang:1.10 as build
+FROM ahaines/envy-build:1 as build
 
 WORKDIR /go/src/github.com/haines/envy
 COPY . .
 
 RUN CGO_ENABLED=0 \
     GOOS=linux \
-    make all
+    make get build
 
 FROM alpine:latest
 
