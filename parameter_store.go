@@ -7,8 +7,16 @@ import (
 )
 
 func parameterGetter(config *Config) (func(string) (string, error), error) {
+	var region *string
+	if config.Region != "" {
+		region = &config.Region
+	}
+
 	sess, err := session.NewSessionWithOptions(session.Options{
-		Config:            aws.Config{CredentialsChainVerboseErrors: aws.Bool(true)},
+		Config: aws.Config{
+			CredentialsChainVerboseErrors: aws.Bool(true),
+			Region: region,
+		},
 		Profile:           config.Profile,
 		SharedConfigState: session.SharedConfigEnable,
 	})

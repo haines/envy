@@ -18,6 +18,7 @@ type Config struct {
 	Permissions    os.FileMode
 	SkipChmod      bool
 	Profile        string
+	Region         string
 }
 
 // Run parses the template definition from the input file, executes it, and writes the result to the output file.

@@ -35,6 +35,7 @@ func init() {
 	command.Flags().Var(newPermissionsValue(0600, &config.Permissions), "chmod", "output file permissions")
 	command.Flags().BoolVar(&config.SkipChmod, "no-chmod", false, "don't modify output file permissions")
 	command.Flags().StringVar(&config.Profile, "profile", "", "use a specific profile from your AWS credential file")
+	command.Flags().StringVar(&config.Region, "region", "", "the AWS region to connect to")
 }
 
 func main() {

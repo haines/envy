@@ -14,10 +14,24 @@ func TestWithCredentialsAndConfigFromEnvironment(t *testing.T) {
 	SkipInShortMode(t)
 
 	result := Envy().Env(Vars{
-		"AWS_ACCESS_KEY_ID":     AwsConfig.AccessKeyID,
-		"AWS_SECRET_ACCESS_KEY": AwsConfig.SecretAccessKey,
-		"AWS_REGION":            AwsConfig.Region,
+		"AWS_ACCESS_KEY_ID":     TestAwsConfig.AccessKeyID,
+		"AWS_SECRET_ACCESS_KEY": TestAwsConfig.SecretAccessKey,
+		"AWS_REGION":            TestAwsConfig.Region,
 	}).Stdin(input).Run()
+
+	assert.Equal(t, 0, result.ExitStatus)
+	assert.Equal(t, output, result.Stdout)
+	assert.Empty(t, result.Stderr)
+}
+
+func TestWithCredentialsFromEnvironmentAndConfigFromCommandLine(t *testing.T) {
+	SkipInShortMode(t)
+
+	result := Envy().Env(Vars{
+		"AWS_ACCESS_KEY_ID":     TestAwsConfig.AccessKeyID,
+		"AWS_SECRET_ACCESS_KEY": TestAwsConfig.SecretAccessKey,
+		"AWS_REGION":            "overridden-by-command-line",
+	}).Stdin(input).Run("--region", TestAwsConfig.Region)
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Equal(t, output, result.Stdout)
@@ -27,7 +41,7 @@ func TestWithCredentialsAndConfigFromEnvironment(t *testing.T) {
 func TestWithCredentialsAndConfigFromDefaultProfile(t *testing.T) {
 	SkipInShortMode(t)
 
-	awsConfigFiles := WriteAwsConfig("default")
+	awsConfigFiles := WriteAwsConfig("default", TestAwsConfig)
 
 	result := Envy().Env(Vars{
 		"AWS_SHARED_CREDENTIALS_FILE": awsConfigFiles.Credentials,
@@ -42,7 +56,7 @@ func TestWithCredentialsAndConfigFromDefaultProfile(t *testing.T) {
 func TestWithCredentialsAndConfigFromProfileFromEnvironment(t *testing.T) {
 	SkipInShortMode(t)
 
-	awsConfigFiles := WriteAwsConfig("not-default")
+	awsConfigFiles := WriteAwsConfig("not-default", TestAwsConfig)
 
 	result := Envy().Env(Vars{
 		"AWS_SHARED_CREDENTIALS_FILE": awsConfigFiles.Credentials,
@@ -58,13 +72,30 @@ func TestWithCredentialsAndConfigFromProfileFromEnvironment(t *testing.T) {
 func TestWithCredentialsAndConfigFromProfileFromCommandLine(t *testing.T) {
 	SkipInShortMode(t)
 
-	awsConfigFiles := WriteAwsConfig("not-default")
+	awsConfigFiles := WriteAwsConfig("not-default", TestAwsConfig)
 
 	result := Envy().Env(Vars{
 		"AWS_SHARED_CREDENTIALS_FILE": awsConfigFiles.Credentials,
 		"AWS_CONFIG_FILE":             awsConfigFiles.Config,
 		"AWS_PROFILE":                 "overridden-by-command-line",
 	}).Stdin(input).Run("--profile", "not-default")
+
+	assert.Equal(t, 0, result.ExitStatus)
+	assert.Equal(t, output, result.Stdout)
+	assert.Empty(t, result.Stderr)
+}
+
+func TestWithCredentialsFromProfileAndConfigFromCommandLine(t *testing.T) {
+	SkipInShortMode(t)
+
+	awsConfig := TestAwsConfig
+	awsConfig.Region = "overridden-by-command-line"
+	awsConfigFiles := WriteAwsConfig("default", awsConfig)
+
+	result := Envy().Env(Vars{
+		"AWS_SHARED_CREDENTIALS_FILE": awsConfigFiles.Credentials,
+		"AWS_CONFIG_FILE":             awsConfigFiles.Config,
+	}).Stdin(input).Run("--region", TestAwsConfig.Region)
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Equal(t, output, result.Stdout)
