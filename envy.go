@@ -1,3 +1,6 @@
+// Package envy implements functions to read and parse a template file,
+// interpolate with values fetched from AWS Parameter Store, and write the
+// result to another file.
 package envy
 
 import (
@@ -13,15 +16,19 @@ var logger = log.New(os.Stderr, "", 0)
 
 // Config holds the parameters for Run.
 type Config struct {
-	InputFilename  string // if empty or "-", the template definition is read from stdin.
-	OutputFilename string // if empty or "-", the output is written to stdout.
-	Permissions    os.FileMode
-	SkipChmod      bool
-	Profile        string
-	Region         string
+	InputFilename  string      // if empty or "-", the template definition is read from stdin.
+	OutputFilename string      // if empty or "-", the output is written to stdout.
+	Permissions    os.FileMode // the permissions to set on the output file.
+	SkipChmod      bool        // if true, don't set permissions on the output file.
+	Profile        string      // the AWS credentials profile to use to connect to Parameter Store.
+	Region         string      // the AWS region in which to connect to Parameter Store.
 }
 
 // Run parses the template definition from the input file, executes it, and writes the result to the output file.
+//
+// The template has access to the following functions:
+//  getParameter "/path/to/value" // fetches a value from AWS Parameter store.
+//  quote "value"                 // wraps a value in single quotes, escaping embedded single quotes with "'\''".
 func Run(config *Config) {
 	template, err := read(config)
 	if err != nil {
