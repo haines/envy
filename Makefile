@@ -11,7 +11,7 @@ VERSION := $(OUT)version
 
 DOCKER_REPO := ahaines/$(BINARY)
 
-LDFLAGS = -ldflags "-X github.com/haines/envy/cmd.Version=`cat $(VERSION)`"
+LDFLAGS = -ldflags "-X main.Version=`cat $(VERSION)`"
 
 WRITE_VERSION := $(shell script/write-version $(VERSION))
 
@@ -19,7 +19,7 @@ $(VERSION):
 	@script/write-version $(VERSION)
 
 $(TARGET): $(SOURCES) $(VERSION)
-	@go build $(LDFLAGS) -o $(TARGET)
+	@go build $(LDFLAGS) -o $(TARGET) cmd/envy/*.go
 
 all: get build test
 

@@ -7,10 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestVersion(t *testing.T) {
-	result := Envy().Run("--version")
+func TestQuote(t *testing.T) {
+	result := Envy().Stdin(`{{ quote "foo'bar" }}`).Run()
 
 	assert.Equal(t, 0, result.ExitStatus)
-	assert.Regexp(t, "^envy ", result.Stdout)
+	assert.Equal(t, `'foo'\''bar'`, result.Stdout)
 	assert.Empty(t, result.Stderr)
 }

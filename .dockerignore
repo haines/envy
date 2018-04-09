@@ -1,5 +1,5 @@
 .gitignore
-Dockerfile
+Dockerfile*
 LICENSE
 README.md
 target/

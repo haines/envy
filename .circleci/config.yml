@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: ahaines/envy-circleci:2
+      - image: ahaines/envy-build:1
 
     working_directory: /go/src/github.com/haines/envy
 
