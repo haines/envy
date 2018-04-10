@@ -12,6 +12,8 @@ OUT := target/
 TARGET_PREFIX := $(OUT)$(BINARY)-
 TARGETS := $(foreach platform,$(PLATFORMS),$(foreach architecture,$(ARCHITECTURES),$(TARGET_PREFIX)$(platform)-$(architecture)))
 TARGET := $(TARGET_PREFIX)$(shell go env GOOS)-$(shell go env GOARCH)
+CHECKSUMS := $(TARGETS:=.sha256)
+SIGNATURES := $(TARGETS:=.asc)
 
 GOOS_GOARCH = $(subst -, ,$(subst $(TARGET_PREFIX),,$@))
 GOOS = $(firstword $(GOOS_GOARCH))
@@ -27,7 +29,13 @@ $(VERSION):
 $(TARGETS): $(SOURCES) $(VERSION)
 	@CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(LDFLAGS) -o $@ cmd/envy/*.go
 
-all: get build test
+$(CHECKSUMS): %.sha256: %
+	@(cd $(dir $<); shasum --algorithm 256 $(notdir $<)) > $@
+
+$(SIGNATURES): %.asc: %
+	@gpg --batch --armor --detach-sig --output $@ $<
+
+all: get test
 
 build: $(TARGET)
 
@@ -46,7 +54,9 @@ get:
 install:
 	@go install $(LDFLAGS)
 
+release: $(CHECKSUMS) $(SIGNATURES)
+
 test: build
 	@go test -v ./test | tee >(go-junit-report >$(OUT)test-results.xml)
 
-.PHONY: all build check clean get install test
+.PHONY: all build check clean get install release test
