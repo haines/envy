@@ -5,6 +5,48 @@
 Values are stored securely in AWS Parameter Store, and can be saved to a local `.env` file or directly sourced into your shell.
 
 
+## Installation
+
+Releases are published on [Github][releases].
+
+### with Homebrew 🍺
+
+A Homebrew cask is available at [`haines/tap`][homebrew-tap].
+
+```console
+$ brew cask install haines/tap/envy
+```
+
+### with Docker 🐳
+
+[Docker images][docker-repo] are tagged with release versions.
+The `latest` tag follows the `master` branch.
+
+```console
+$ docker pull ahaines/envy:$version
+```
+
+### manually 🔧
+
+`envy` is distributed as a static binary, so installation just requires it to be downloaded from the [releases] page, then made executable:
+
+```console
+$ curl -L $url -o /usr/local/bin/envy
+$ chmod +x /usr/local/bin/envy
+```
+
+Binaries can be verified by running
+```console
+$ gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 6E225DD62262D98AAC77F9CDB16A6F178227A23E
+gpg: key B16A6F178227A23E: public key "Andrew Haines <andrew@haines.org.nz>" imported
+
+$ curl -fsSL "${url}.asc" | gpg --verify - /usr/local/bin/envy
+gpg: Signature made Tue Apr 10 11:18:05 2018 UTC
+gpg:                using RSA key 6E225DD62262D98AAC77F9CDB16A6F178227A23E
+gpg: Good signature from "Andrew Haines <andrew@haines.org.nz>" [unknown]
+```
+
+
 ## Usage
 
 ```console
@@ -18,7 +60,7 @@ $ envy --help
 
 ### Templates
 
-The input template file is a [Go text template](https://golang.org/pkg/text/template/), which has access to the following functions in interpolations:
+The input template file is a [Go text template][go-text-template], which has access to the following functions in interpolations:
 
 * `getParameter "/path/to/value"` - fetches a value from AWS Parameter store
 * `quote` - wraps a value in single quotes, escaping embedded single quotes with `'\''` (closing the string, concatenating a literal `'`, and re-opening the string)
@@ -69,3 +111,9 @@ If no profile is specified, the `default` profile will be used (if it exists).
 
 When running on an EC2 instance, if the access key environment variables aren't set, `envy` can use the instance's IAM role to authenticate.
 You don't need to manually specify any credentials in this case.
+
+
+[docker-repo]: https://hub.docker.com/r/ahaines/envy/
+[go-text-template]: https://golang.org/pkg/text/template/
+[homebrew-tap]: https://github.com/haines/homebrew-tap
+[releases]: https://github.com/haines/envy/releases
