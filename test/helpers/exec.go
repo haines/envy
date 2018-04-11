@@ -2,8 +2,10 @@ package helpers
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"syscall"
 )
@@ -25,7 +27,7 @@ type envyResult struct {
 
 func init() {
 	var err error
-	envyPath, err = filepath.Abs("../target/envy")
+	envyPath, err = filepath.Abs(fmt.Sprintf("../target/envy-%s-%s", runtime.GOOS, runtime.GOARCH))
 	if err != nil {
 		panic(err)
 	}
