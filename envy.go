@@ -27,8 +27,8 @@ type Config struct {
 // Run parses the template definition from the input file, executes it, and writes the result to the output file.
 //
 // The template has access to the following functions:
-//  getParameter "/path/to/value" // fetches a value from AWS Parameter store.
-//  quote "value"                 // wraps a value in single quotes, escaping embedded single quotes with "'\''".
+//  param "path" "to" "value" // fetches a value from AWS Parameter store.
+//  quote "value"             // wraps a value in single quotes, escaping embedded single quotes with "'\''".
 func Run(config *Config) {
 	template, err := read(config)
 	if err != nil {
@@ -69,14 +69,14 @@ func read(config *Config) (*template.Template, error) {
 		return nil, err
 	}
 
-	getParameter, err := parameterGetter(config)
+	param, err := parameterGetter(config)
 	if err != nil {
 		return nil, err
 	}
 
 	return template.New(name).Funcs(template.FuncMap{
-		"getParameter": getParameter,
-		"quote":        quote,
+		"param": param,
+		"quote": quote,
 	}).Parse(string(contents))
 }
 

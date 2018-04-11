@@ -62,12 +62,12 @@ $ envy --help
 
 The input template file is a [Go text template][go-text-template], which has access to the following functions in interpolations:
 
-* `getParameter "/path/to/value"` - fetches a value from AWS Parameter store
-* `quote` - wraps a value in single quotes, escaping embedded single quotes with `'\''` (closing the string, concatenating a literal `'`, and re-opening the string)
+* `param "path" "to" "value"` - fetches a value from AWS Parameter store
+* `quote "value"` - wraps a value in single quotes, escaping embedded single quotes with `'\''` (closing the string, concatenating a literal `'`, and re-opening the string)
 
 For example,
 ```shell
-export FOO={{ getParameter "/secrets/foo" | quote }}
+export FOO={{ param "secrets" "foo" | quote }}
 ```
 would render as
 ```shell
