@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"text/template"
 )
 
@@ -16,19 +15,21 @@ var logger = log.New(os.Stderr, "", 0)
 
 // Config holds the parameters for Run.
 type Config struct {
-	InputFilename  string      // if empty or "-", the template definition is read from stdin.
-	OutputFilename string      // if empty or "-", the output is written to stdout.
-	Permissions    os.FileMode // the permissions to set on the output file.
-	SkipChmod      bool        // if true, don't set permissions on the output file.
-	Profile        string      // the AWS credentials profile to use to connect to Parameter Store.
-	Region         string      // the AWS region in which to connect to Parameter Store.
+	Variables      map[string]string // user-supplied variables which can be interpolated with `var`.
+	InputFilename  string            // if empty or "-", the template definition is read from stdin.
+	OutputFilename string            // if empty or "-", the output is written to stdout.
+	Permissions    os.FileMode       // the permissions to set on the output file.
+	SkipChmod      bool              // if true, don't set permissions on the output file.
+	Profile        string            // the AWS credentials profile to use to connect to Parameter Store.
+	Region         string            // the AWS region in which to connect to Parameter Store.
 }
 
 // Run parses the template definition from the input file, executes it, and writes the result to the output file.
 //
 // The template has access to the following functions:
-//  param "path" "to" "value" // fetches a value from AWS Parameter store.
+//  param "path" "to" "value" // fetches a value from AWS Parameter Store.
 //  quote "value"             // wraps a value in single quotes, escaping embedded single quotes with "'\''".
+//  var "name"                // fetches a user-supplied value from the Variables map.
 func Run(config *Config) {
 	template, err := read(config)
 	if err != nil {
@@ -69,7 +70,7 @@ func read(config *Config) (*template.Template, error) {
 		return nil, err
 	}
 
-	param, err := parameterGetter(config)
+	param, err := paramFunc(config)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +78,7 @@ func read(config *Config) (*template.Template, error) {
 	return template.New(name).Funcs(template.FuncMap{
 		"param": param,
 		"quote": quote,
+		"var":   varFunc(config),
 	}).Parse(string(contents))
 }
 
@@ -111,8 +113,4 @@ func write(template *template.Template, config *Config) error {
 	}
 
 	return err
-}
-
-func quote(value string) string {
-	return "'" + strings.Replace(value, "'", `'\''`, -1) + "'"
 }

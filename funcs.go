@@ -1,6 +1,7 @@
 package envy
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -8,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ssm"
 )
 
-func parameterGetter(config *Config) (func(...string) (string, error), error) {
+func paramFunc(config *Config) (func(...string) (string, error), error) {
 	var region *string
 	if config.Region != "" {
 		region = &config.Region
@@ -44,4 +45,18 @@ func parameterGetter(config *Config) (func(...string) (string, error), error) {
 
 		return *result.Parameter.Value, nil
 	}, nil
+}
+
+func quote(value string) string {
+	return "'" + strings.Replace(value, "'", `'\''`, -1) + "'"
+}
+
+func varFunc(config *Config) func(string) (string, error) {
+	return func(name string) (string, error) {
+		value, ok := config.Variables[name]
+		if !ok {
+			return "", fmt.Errorf("no value provided for %q", name)
+		}
+		return value, nil
+	}
 }
