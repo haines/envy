@@ -62,12 +62,13 @@ $ envy --help
 
 The input template file is a [Go text template][go-text-template], which has access to the following functions in interpolations:
 
-* `getParameter "/path/to/value"` - fetches a value from AWS Parameter store
-* `quote` - wraps a value in single quotes, escaping embedded single quotes with `'\''` (closing the string, concatenating a literal `'`, and re-opening the string)
+* `param "path" "to" "value"` - fetches a value from AWS Parameter Store
+* `quote "value"` - wraps a value in single quotes, escaping embedded single quotes with `'\''` (closing the string, concatenating a literal `'`, and re-opening the string)
+* `var "name"` - fetches a value supplied with `--var name=value` at the command line
 
 For example,
 ```shell
-export FOO={{ getParameter "/secrets/foo" | quote }}
+export FOO={{ param "secrets" "foo" | quote }}
 ```
 would render as
 ```shell
@@ -77,7 +78,7 @@ if the value `bar` was stored in Parameter Store under the key `/secrets/foo`.
 
 ### File permissions
 
-When writing to a file, `envy` ensures that its permissions are `600` (only accessible by its owner).
+When writing to a file, `envy` ensures that the file's permissions are `600` (only accessible by its owner).
 To customize the permissions, use e.g. `--chmod 640`.
 To leave the permissions alone, use `--no-chmod`.
 

@@ -30,12 +30,15 @@ saved to a local .env file or directly sourced into your shell.`,
 func init() {
 	command.SetVersionTemplate("{{.Name}} {{.Version}}\n")
 
-	command.Flags().StringVarP(&config.InputFilename, "input", "i", "-", `read template from file ("-" is stdin)`)
-	command.Flags().StringVarP(&config.OutputFilename, "output", "o", "-", `write output to file ("-" is stdout)`)
-	command.Flags().Var(newPermissionsValue(0600, &config.Permissions), "chmod", "output file permissions")
-	command.Flags().BoolVar(&config.SkipChmod, "no-chmod", false, "don't modify output file permissions")
-	command.Flags().StringVar(&config.Profile, "profile", "", "use a specific profile from your AWS credential file")
-	command.Flags().StringVar(&config.Region, "region", "", "the AWS region to connect to")
+	flags := command.Flags()
+	flags.Var(newVariablesValue(&config.Variables), "var", `a variable to be interpolated into the template with {{ var "name" }}`)
+	flags.StringVarP(&config.InputFilename, "input", "i", "-", `read template from file ("-" is stdin)`)
+	flags.StringVarP(&config.OutputFilename, "output", "o", "-", `write output to file ("-" is stdout)`)
+	flags.Var(newPermissionsValue(0600, &config.Permissions), "chmod", "output file permissions")
+	flags.BoolVar(&config.SkipChmod, "no-chmod", false, "don't modify output file permissions")
+	flags.StringVar(&config.Profile, "profile", "", "use a specific profile from your AWS credential file")
+	flags.StringVar(&config.Region, "region", "", "the AWS region to connect to")
+	flags.SortFlags = false
 }
 
 func main() {

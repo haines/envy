@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const input = `{{ getParameter "/test/string" }},{{ getParameter "/test/secure-string" }}`
+const input = `{{ param "test" "string" }},{{ param "test" "secure-string" }}`
 const output = "foo,bar"
 
 func TestWithCredentialsAndConfigFromEnvironment(t *testing.T) {
@@ -96,6 +96,20 @@ func TestWithCredentialsFromProfileAndConfigFromCommandLine(t *testing.T) {
 		"AWS_SHARED_CREDENTIALS_FILE": awsConfigFiles.Credentials,
 		"AWS_CONFIG_FILE":             awsConfigFiles.Config,
 	}).Stdin(input).Run("--region", TestAwsConfig.Region)
+
+	assert.Equal(t, 0, result.ExitStatus)
+	assert.Equal(t, output, result.Stdout)
+	assert.Empty(t, result.Stderr)
+}
+
+func TestWithFullPathsToParameters(t *testing.T) {
+	SkipInShortMode(t)
+
+	result := Envy().Env(Vars{
+		"AWS_ACCESS_KEY_ID":     TestAwsConfig.AccessKeyID,
+		"AWS_SECRET_ACCESS_KEY": TestAwsConfig.SecretAccessKey,
+		"AWS_REGION":            TestAwsConfig.Region,
+	}).Stdin(`{{ param "/test/string" }},{{ param "/test/secure-string" }}`).Run()
 
 	assert.Equal(t, 0, result.ExitStatus)
 	assert.Equal(t, output, result.Stdout)

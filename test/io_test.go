@@ -141,5 +141,5 @@ func TestInvalidPermissions(t *testing.T) {
 
 	assert.Equal(t, 1, result.ExitStatus)
 	assert.Empty(t, result.Stdout)
-	assert.Regexp(t, "expected three octal digits", result.Stderr)
+	assert.Contains(t, result.Stderr, "expected three octal digits")
 }
