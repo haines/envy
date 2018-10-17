@@ -40,7 +40,7 @@ func paramFunc(config *Config) (func(...string) (string, error), error) {
 			WithDecryption: aws.Bool(true),
 		})
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to read %q from Parameter Store:\n%v", name, err)
 		}
 
 		return *result.Parameter.Value, nil
