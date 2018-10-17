@@ -1,4 +1,4 @@
-FROM ahaines/envy-build:1 as build
+FROM ahaines/envy-build:2 as build
 
 WORKDIR /go/src/github.com/haines/envy
 COPY . .
