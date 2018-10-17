@@ -115,3 +115,17 @@ func TestWithFullPathsToParameters(t *testing.T) {
 	assert.Equal(t, output, result.Stdout)
 	assert.Empty(t, result.Stderr)
 }
+
+func TestWithMissingParameter(t *testing.T) {
+	SkipInShortMode(t)
+
+	result := Envy().Env(Vars{
+		"AWS_ACCESS_KEY_ID":     TestAwsConfig.AccessKeyID,
+		"AWS_SECRET_ACCESS_KEY": TestAwsConfig.SecretAccessKey,
+		"AWS_REGION":            TestAwsConfig.Region,
+	}).Stdin(`{{ param "this" "does" "not" "exist" }}`).Run()
+
+	assert.Equal(t, 1, result.ExitStatus)
+	assert.Empty(t, result.Stdout)
+	assert.Contains(t, result.Stderr, `"/this/does/not/exist"`)
+}
