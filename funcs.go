@@ -47,8 +47,8 @@ func paramFunc(config *Config) (func(...string) (string, error), error) {
 	}, nil
 }
 
-func quote(value string) string {
-	return "'" + strings.Replace(value, "'", `'\''`, -1) + "'"
+func quote(value interface{}) string {
+	return fmt.Sprintf("'%s'", strings.Replace(fmt.Sprintf("%v", value), "'", `'\''`, -1))
 }
 
 func varFunc(config *Config) func(string) (string, error) {
